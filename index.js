@@ -20,10 +20,12 @@ async function startConvo() {
   try {
     const maxTurns = 25;
     let turn = 0;
-    let lastMessage = "hey lets do something interesting";
+    let conversationHistory = [
+  { role: "user", parts: [{ text: "hey lets do something interesting" }] }
+];
     
     console.log("Starting multi-bot conversation with system instructions...\n");
-    console.log(`INITIAL MESSAGE: ${lastMessage}\n`);
+    console.log(`INITIAL MESSAGE: ${conversationHistory[0].parts[0].text}\n`);
     
     while (turn < maxTurns) {
       const currentBot = turn % 2 === 0 ? "bot1" : "bot2";
@@ -34,7 +36,7 @@ async function startConvo() {
       
       const response = await ai.models.generateContent({
         model: "gemini-2.0-flash",
-        contents: lastMessage,
+        contents: conversationHistory,
         config: {
           systemInstruction: bots[currentBot].systemInstruction,
           maxOutputTokens: 200,
@@ -45,7 +47,10 @@ async function startConvo() {
       console.log(`${currentBot.toUpperCase()}: ${response.text}\n`);
       
       
-      lastMessage = response.text;
+      conversationHistory.push({
+        role: "user", 
+        parts: [{ text: response.text }]
+      });
       
       
       await new Promise(resolve => setTimeout(resolve, 1500));
